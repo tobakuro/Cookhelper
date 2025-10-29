@@ -14,26 +14,7 @@
    - Flutter SDKに含まれています（^3.9.2）
 
 3. **開発環境（いずれか一つ）**
-   - Android Studio (推奨)
    - Visual Studio Code + Flutter拡張機能
-   - IntelliJ IDEA + Flutter プラグイン
-
-4. **プラットフォーム別要件**
-
-   **Android開発の場合:**
-   - Android Studio
-   - Android SDK (API level 21以上)
-   - Java 8以上
-
-   **iOS開発の場合 (macOSのみ):**
-   - Xcode 14.0以上
-   - iOS Simulator
-
-   **Web開発の場合:**
-   - Chrome ブラウザ
-
-   **Windows/Linux/macOS デスクトップ開発の場合:**
-   - 各プラットフォームに応じた追加設定
 
 ## セットアップ手順
 
@@ -56,7 +37,7 @@ flutter pub get
 flutter doctor
 ```
 
-すべての項目が✓になるまで、表示された問題を解決してください。
+すべての項目が✓になればOK
 
 ### 4. 実行
 
@@ -70,20 +51,8 @@ flutter run
 # Android
 flutter run -d android
 
-# iOS (macOSのみ)
-flutter run -d ios
-
 # Web
 flutter run -d web
-
-# Windows (Windowsのみ)
-flutter run -d windows
-
-# macOS (macOSのみ)
-flutter run -d macos
-
-# Linux (Linuxのみ)
-flutter run -d linux
 ```
 
 ## 開発用コマンド
@@ -104,9 +73,6 @@ flutter analyze
 ```bash
 # Android APK
 flutter build apk --release
-
-# iOS (macOSのみ)
-flutter build ios --release
 
 # Web
 flutter build web --release
