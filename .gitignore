@@ -33,6 +33,15 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Generated plugin files (platform-specific)
+**/GeneratedPluginRegistrant.*
+**/generated_plugin_registrant.*
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
 # Symbolication related
 app.*.symbols
 
