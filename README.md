@@ -39,20 +39,48 @@ flutter doctor
 
 すべての項目が✓になればOK
 
-### 4. 実行
+### 4. エミュレーター起動とアプリ実行
+
+**エミュレーター/シミュレーターの起動:**
+
+**Android エミュレーター:**
+```bash
+# 利用可能なエミュレーターを確認
+flutter emulators
+
+# エミュレーターを起動
+flutter emulators --launch <emulator_id>
+
+# 例: Pixel_3a_API_30_x86 を起動
+flutter emulators --launch Pixel_3a_API_30_x86
+```
+
+**接続されたデバイス/エミュレーターの確認:**
+```bash
+flutter devices
+```
+
+**アプリの実行:**
 
 **デバッグモードで実行:**
 ```bash
+# 利用可能なデバイスで自動実行
 flutter run
+
+# 特定のデバイスで実行
+flutter run -d <device_id>
 ```
 
 **特定のプラットフォームで実行:**
 ```bash
-# Android
+# Android エミュレーター/デバイス
 flutter run -d android
 
-# Web
+# Web ブラウザ
 flutter run -d web
+
+# Chrome で実行
+flutter run -d chrome
 ```
 
 ## 開発用コマンド
