@@ -4,10 +4,11 @@ import 'screens/home_screen.dart';
 
 Future main() async {
     // .envファイルを読み込み
+    WidgetsFlutterBinding.ensureInitialized();
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {
-      print('Warning: Could not load .env file: $e');
+      debugPrint('Warning: Could not load .env file: $e');
     }
 
     runApp(const MyApp());
