@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../gemini/gemini_service.dart';
+import '../gemini/gemini_text_service.dart';
 import 'recipe_detail_screen.dart';
 
 class RecipeSearchScreen extends StatefulWidget {
@@ -10,7 +10,7 @@ class RecipeSearchScreen extends StatefulWidget {
 }
 
 class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
-  final GeminiService _geminiService = GeminiService();
+  final GeminiTextService _geminiService = GeminiTextService();
   final TextEditingController _searchController = TextEditingController();
   String _recipe = '';
   bool _isLoading = false;
@@ -129,7 +129,7 @@ class _RecipeSearchScreenState extends State<RecipeSearchScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => RecipeDetailScreen(
-                            recipe: _recipe,
+                            recipeContent: _recipe,
                             recipeName: _searchController.text,
                           ),
                         ),
