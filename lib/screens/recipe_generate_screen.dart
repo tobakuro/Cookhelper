@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../gemini/gemini_service.dart';
+import '../gemini/gemini_text_service.dart';
 import 'recipe_detail_screen.dart';
 
 class RecipeGenerateScreen extends StatefulWidget {
@@ -10,7 +10,7 @@ class RecipeGenerateScreen extends StatefulWidget {
 }
 
 class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
-  final GeminiService _geminiService = GeminiService();
+  final GeminiTextService _geminiService = GeminiTextService();
   final TextEditingController _ingredientsController = TextEditingController();
   String _recipe = '';
   String _generatedRecipeName = '';
@@ -143,7 +143,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => RecipeDetailScreen(
-                            recipe: _recipe,
+                            recipeContent: _recipe,
                             recipeName: _generatedRecipeName,
                           ),
                         ),
