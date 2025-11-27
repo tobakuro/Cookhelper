@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'recipe_search_screen.dart';
 import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
+import 'cooking_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -67,6 +68,21 @@ class HomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const RecipeGenerateScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                icon: Icons.mic,
+                label: '音声調理モード',
+                description: 'ハンズフリーで調理',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CookingScreen(),
                     ),
                   );
                 },
