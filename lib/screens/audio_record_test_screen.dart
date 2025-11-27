@@ -3,6 +3,7 @@ import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:audioplayers/audioplayers.dart';
 
 class AudioRecordTestScreen extends StatefulWidget {
   const AudioRecordTestScreen({super.key});
@@ -13,13 +14,29 @@ class AudioRecordTestScreen extends StatefulWidget {
 
 class _AudioRecordTestScreenState extends State<AudioRecordTestScreen> {
   final AudioRecorder _audioRecorder = AudioRecorder();
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isRecording = false;
+  bool _isPlaying = false;
   String _recordingPath = '';
   String _statusMessage = '';
 
   @override
+  void initState() {
+    super.initState();
+    // 再生状態のリスナーを設定
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = state == PlayerState.playing;
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _audioRecorder.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -100,11 +117,11 @@ class _AudioRecordTestScreenState extends State<AudioRecordTestScreen> {
 
         if (kIsWeb) {
           _statusMessage = _recordingPath.isNotEmpty
-              ? '録音完了！\nWeb環境: データはメモリに保存されました'
+              ? '録音完了！\nWeb環境: データはメモリに保存されました\n「再生」ボタンで確認できます'
               : '録音に失敗しました';
         } else {
           _statusMessage = _recordingPath.isNotEmpty
-              ? '録音完了！\n保存先: $_recordingPath'
+              ? '録音完了！\n保存先: $_recordingPath\n「再生」ボタンで確認できます'
               : '録音に失敗しました';
         }
       });
@@ -112,6 +129,45 @@ class _AudioRecordTestScreenState extends State<AudioRecordTestScreen> {
       setState(() {
         _statusMessage = 'エラー: $e';
         _isRecording = false;
+      });
+    }
+  }
+
+  Future<void> _playRecording() async {
+    if (_recordingPath.isEmpty) {
+      setState(() {
+        _statusMessage = '再生する録音がありません';
+      });
+      return;
+    }
+
+    try {
+      if (kIsWeb) {
+        // Web環境: DeviceFileSourceを使用
+        await _audioPlayer.play(DeviceFileSource(_recordingPath));
+      } else {
+        // Android/iOS環境: DeviceFileSourceを使用
+        await _audioPlayer.play(DeviceFileSource(_recordingPath));
+      }
+      setState(() {
+        _statusMessage = '再生中...';
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = '再生エラー: $e';
+      });
+    }
+  }
+
+  Future<void> _stopPlaying() async {
+    try {
+      await _audioPlayer.stop();
+      setState(() {
+        _statusMessage = '再生停止';
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = '停止エラー: $e';
       });
     }
   }
@@ -178,6 +234,28 @@ class _AudioRecordTestScreenState extends State<AudioRecordTestScreen> {
               onPressed: _isRecording ? _stopRecording : null,
               icon: const Icon(Icons.stop),
               label: const Text('録音停止'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: (_recordingPath.isNotEmpty && !_isPlaying) ? _playRecording : null,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('再生'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _isPlaying ? _stopPlaying : null,
+              icon: const Icon(Icons.stop),
+              label: const Text('再生停止'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
