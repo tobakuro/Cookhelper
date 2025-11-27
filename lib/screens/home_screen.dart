@@ -3,6 +3,7 @@ import 'recipe_search_screen.dart';
 import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
 import 'cooking_screen.dart';
+import 'audio_record_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -98,6 +99,21 @@ class HomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const FavoritesScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                icon: Icons.mic_external_on,
+                label: '音声録音テスト',
+                description: 'マイク録音機能のテスト',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AudioRecordTestScreen(),
                     ),
                   );
                 },
