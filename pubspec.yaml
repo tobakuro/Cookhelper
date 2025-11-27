@@ -38,14 +38,15 @@ dependencies:
   # Gemini Live API
   gemini_live: ^0.1.1
 
-  # Environment variables
+  # 環境変数
   flutter_dotenv: ^6.0.0
   google_generative_ai: ^0.4.7
 
-  # Audio recording
+  # 音声録音と再生
   record: ^6.1.2
   permission_handler: ^12.0.1
   path_provider: ^2.1.5
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
