@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'recipe_search_screen.dart';
 import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
+import 'cooking_screen.dart';
+import 'audio_record_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -74,6 +76,21 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
+                icon: Icons.mic,
+                label: '音声調理モード',
+                description: 'ハンズフリーで調理',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CookingScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
                 icon: Icons.favorite,
                 label: 'お気に入り',
                 description: '保存したレシピ',
@@ -82,6 +99,21 @@ class HomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const FavoritesScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                icon: Icons.mic_external_on,
+                label: '音声録音テスト',
+                description: 'マイク録音機能のテスト',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AudioRecordTestScreen(),
                     ),
                   );
                 },
