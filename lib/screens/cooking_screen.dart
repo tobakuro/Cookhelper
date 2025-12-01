@@ -1,221 +1,208 @@
 import 'package:flutter/material.dart';
-import '../gemini/gemini_live_service.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class CookingScreen extends StatefulWidget {
-  const CookingScreen({super.key});
+  final String recipeName;
+  final String recipeContent;
+
+  const CookingScreen({
+    super.key,
+    required this.recipeName,
+    required this.recipeContent,
+  });
 
   @override
   State<CookingScreen> createState() => _CookingScreenState();
 }
 
 class _CookingScreenState extends State<CookingScreen> {
-  final GeminiLiveService _geminiService = GeminiLiveService();
-  final TextEditingController _messageController = TextEditingController();
-  final List<String> _messages = [];
-  bool _isConnected = false;
-  bool _isConnecting = false;
+  final FlutterTts _flutterTts = FlutterTts();
+  bool _isSpeaking = false;
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTts();
+  }
+
+  Future<void> _initializeTts() async {
+    await _flutterTts.setLanguage('ja-JP');
+    await _flutterTts.setSpeechRate(1.0);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(3.0);
+
+    _flutterTts.setCompletionHandler(() {
+      if (mounted) {
+        setState(() {
+          _isSpeaking = false;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
-    _messageController.dispose();
-    _geminiService.disconnect();
+    _flutterTts.stop();
     super.dispose();
   }
 
-  Future<void> _connect() async {
-    setState(() {
-      _isConnecting = true;
-    });
-
-    try {
-      await _geminiService.connect();
+  Future<void> _speakRecipe() async {
+    if (_isSpeaking) {
+      await _flutterTts.stop();
       setState(() {
-        _isConnected = true;
-        _messages.add('[システム] 接続しました');
+        _isSpeaking = false;
       });
-    } catch (e) {
+    } else {
       setState(() {
-        _messages.add('[エラー] 接続に失敗しました: $e');
+        _isSpeaking = true;
       });
-    } finally {
-      setState(() {
-        _isConnecting = false;
-      });
+      await _flutterTts.speak(widget.recipeContent);
     }
   }
 
-  Future<void> _disconnect() async {
-    await _geminiService.disconnect();
+  void _toggleFavorite() {
     setState(() {
-      _isConnected = false;
-      _messages.add('[システム] 切断しました');
-    });
-  }
-
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('メッセージを入力してください')),
-      );
-      return;
-    }
-
-    if (!_isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('先に接続してください')),
-      );
-      return;
-    }
-
-    final message = _messageController.text;
-    setState(() {
-      _messages.add('[送信] $message');
+      _isFavorite = !_isFavorite;
     });
 
-    _geminiService.sendMessage(message);
-    _messageController.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isFavorite ? 'お気に入りに追加しました' : 'お気に入りから削除しました',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gemini Live API テスト'),
+        title: Text(
+          widget.recipeName,
+          style: const TextStyle(fontSize: 18),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : null,
+            ),
+            onPressed: _toggleFavorite,
+            tooltip: _isFavorite ? 'お気に入りから削除' : 'お気に入りに追加',
+          ),
+        ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 接続状態表示
-            Card(
-              color: _isConnected ? Colors.green.shade50 : Colors.grey.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _isConnected ? Icons.check_circle : Icons.cancel,
-                          color: _isConnected ? Colors.green : Colors.grey,
+            // レシピタイトル
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.restaurant_menu,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          widget.recipeName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _isConnected ? '接続中' : '未接続',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _isConnected ? Colors.green : Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: _isConnecting
-                          ? null
-                          : (_isConnected ? _disconnect : _connect),
-                      child: _isConnecting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(_isConnected ? '切断' : '接続'),
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // レシピ内容
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Text(
+                widget.recipeContent,
+                style: const TextStyle(
+                  fontSize: 16,
+                  height: 1.6,
                 ),
               ),
             ),
+
+            const SizedBox(height: 24),
+
+            // 音声読み上げボタン（大きく強調）
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _speakRecipe,
+                icon: Icon(
+                  _isSpeaking ? Icons.stop : Icons.volume_up,
+                  size: 32,
+                ),
+                label: Text(
+                  _isSpeaking ? '読み上げ停止' : '音声で読み上げる',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  backgroundColor: _isSpeaking ? Colors.red : Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+
             const SizedBox(height: 16),
 
-            // メッセージ送信欄
+            // その他のアクションボタン
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      labelText: 'メッセージ',
-                      hintText: 'Gemini Live APIに送信するメッセージ',
-                      border: OutlineInputBorder(),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // 共有機能（今後実装）
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('共有機能は今後実装予定です'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.share),
+                    label: const Text('レシピを共有'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    onSubmitted: (_) => _sendMessage(),
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _isConnected ? _sendMessage : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  child: const Icon(Icons.send),
                 ),
               ],
-            ),
-            const SizedBox(height: 24),
-
-            // メッセージ履歴
-            const Text(
-              'メッセージ履歴',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey.shade50,
-                ),
-                child: _messages.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '接続してメッセージを送信してください',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: _messages.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              _messages[index],
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.5,
-                                color: _messages[index].startsWith('[エラー]')
-                                    ? Colors.red
-                                    : _messages[index].startsWith('[システム]')
-                                        ? Colors.blue
-                                        : Colors.black87,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
             ),
           ],
         ),
