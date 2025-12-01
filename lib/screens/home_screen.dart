@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'recipe_search_screen.dart';
 import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
-import 'cooking_screen.dart';
+import 'gemini_live_test_screen.dart';
 import 'audio_record_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -76,14 +76,14 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
-                icon: Icons.mic,
-                label: '音声調理モード',
-                description: 'ハンズフリーで調理',
+                icon: Icons.science,
+                label: 'Gemini Live テスト',
+                description: 'Gemini Live API接続テスト',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CookingScreen(),
+                      builder: (context) => const GeminiLiveTestScreen(),
                     ),
                   );
                 },

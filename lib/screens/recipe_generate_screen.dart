@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../gemini/gemini_text_service.dart';
-import 'recipe_detail_screen.dart';
+import 'cooking_screen.dart';
 
 class RecipeGenerateScreen extends StatefulWidget {
   const RecipeGenerateScreen({super.key});
@@ -142,7 +142,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RecipeDetailScreen(
+                          builder: (context) => CookingScreen(
                             recipeContent: _recipe,
                             recipeName: _generatedRecipeName,
                           ),
