@@ -9,11 +9,17 @@ class RecipeGenerateScreen extends StatefulWidget {
   State<RecipeGenerateScreen> createState() => _RecipeGenerateScreenState();
 }
 
+class Recipe {
+  final String name;
+  final String fullContent;
+
+  Recipe({required this.name, required this.fullContent});
+}
+
 class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
   final GeminiTextService _geminiService = GeminiTextService();
   final TextEditingController _ingredientsController = TextEditingController();
-  String _recipe = '';
-  String _generatedRecipeName = '';
+  List<Recipe> _recipes = [];
   bool _isLoading = false;
 
   @override
@@ -32,21 +38,29 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 
     setState(() {
       _isLoading = true;
-      _recipe = '';
-      _generatedRecipeName = '';
+      _recipes = [];
     });
 
     try {
       final prompt = '''
 手元にある材料: ${_ingredientsController.text}
 
-あなたは優秀な料理研究家です。
-上記の材料を使って作れる料理のレシピを1つ提案してください。
-食材は必ず指定された物のみを扱うようにしてください。調味料は自由に使用してかまいません。
-以下の形式で詳しく教えてください：
+あなたはユーザの料理を快適にサポートするプロの料理アシスタントです。
+入力された冷蔵庫の中身およびユーザの料理の好みに基づき、以下のルールに従って３つの料理を提案して下さい。
+ルール
+1.提案する料理は必ず入力された食材のみを使用し、基本的な調味料（砂糖、醤油、味噌、塩、酢、サラダ油、etc）は常備されているものとして無視してかまいません。
+2.調理時間は最長でも60分以内のものを提案してください。
+3.使いたい材料がある場合は優先して使ってください
+4.回答はユーザーが入力した言語に合わせてください
+以下の形式で提案してください：
 
+===レシピ1===
 【料理名】
+料理名を記載
+
 【調理時間】
+調理時間を記載
+
 【材料】（1人分）
 - 使用する材料とその分量をリスト形式で記載
 
@@ -59,41 +73,82 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 ステップ2: フライパンに油を引いて中火で熱します
 ステップ3: 玉ねぎを入れて透明になるまで炒めます
 
-このように、細かく分けて10〜15ステップ程度で記載してください。
-
 【ポイント】
 - コツや注意点を記載
 
-日本語で、わかりやすく、料理初心者でも作れるように詳しく説明してください。
-できるだけ手元にある材料を活用したレシピを提案してください。
+===レシピ2===
+（同じ形式で2つ目のレシピ）
+
+===レシピ3===
+（同じ形式で3つ目のレシピ）
+
+重要：
+- 必ず3つのレシピを「===レシピ1===」「===レシピ2===」「===レシピ3===」で区切ってください
+- 各レシピは10〜15ステップ程度に細かく分けてください
+- 日本語で、わかりやすく、料理初心者でも作れるように詳しく説明してください
 ''';
 
       final response = await _geminiService.generateContent(prompt);
 
-      // 料理名を抽出（簡易的な実装）
-      String recipeName = '生成されたレシピ';
-      final lines = response.split('\n');
-      for (var line in lines) {
-        if (line.contains('【料理名】')) {
-          final nextLineIndex = lines.indexOf(line) + 1;
-          if (nextLineIndex < lines.length) {
-            recipeName = lines[nextLineIndex].trim();
-            break;
-          }
-        }
-      }
+      // レシピを解析
+      final recipes = _parseRecipes(response);
 
       setState(() {
-        _recipe = response;
-        _generatedRecipeName = recipeName;
+        _recipes = recipes;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _recipe = 'エラーが発生しました: $e';
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('エラーが発生しました: $e')),
+      );
     }
+  }
+
+  List<Recipe> _parseRecipes(String response) {
+    final List<Recipe> recipes = [];
+
+    // ===レシピ1===, ===レシピ2===, ===レシピ3=== で分割
+    final recipeBlocks = <String>[];
+    final lines = response.split('\n');
+    StringBuffer currentBlock = StringBuffer();
+    bool inRecipe = false;
+
+    for (var line in lines) {
+      if (line.contains('===レシピ')) {
+        if (inRecipe && currentBlock.isNotEmpty) {
+          recipeBlocks.add(currentBlock.toString());
+          currentBlock.clear();
+        }
+        inRecipe = true;
+      } else if (inRecipe) {
+        currentBlock.writeln(line);
+      }
+    }
+
+    // 最後のブロックを追加
+    if (currentBlock.isNotEmpty) {
+      recipeBlocks.add(currentBlock.toString());
+    }
+
+    // 各ブロックから料理名を抽出
+    for (var block in recipeBlocks) {
+      String recipeName = '生成されたレシピ';
+      final blockLines = block.split('\n');
+
+      for (int i = 0; i < blockLines.length; i++) {
+        if (blockLines[i].contains('【料理名】') && i + 1 < blockLines.length) {
+          recipeName = blockLines[i + 1].trim();
+          break;
+        }
+      }
+
+      recipes.add(Recipe(name: recipeName, fullContent: block));
+    }
+
+    return recipes;
   }
 
   @override
@@ -134,76 +189,117 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            if (_recipe.isNotEmpty) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '生成されたレシピ',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CookingScreen(
-                            recipeContent: _recipe,
-                            recipeName: _generatedRecipeName,
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('調理モード'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey.shade50,
+
+            // レシピ選択ボタン
+            if (_recipes.isNotEmpty) ...[
+              const Text(
+                '作りたいレシピを選択してください',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: _recipe.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.auto_awesome,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '材料を入力してレシピを生成してください',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        child: Text(
-                          _recipe,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
               ),
+              const SizedBox(height: 16),
+            ],
+
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _recipes.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                size: 64,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '材料を入力してレシピを生成してください',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _recipes.length,
+                          itemBuilder: (context, index) {
+                            final recipe = _recipes[index];
+                            return Card(
+                              elevation: 3,
+                              margin: const EdgeInsets.only(bottom: 16),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CookingScreen(
+                                        recipeContent: recipe.fullContent,
+                                        recipeName: recipe.name,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primaryContainer,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Icon(
+                                          Icons.restaurant,
+                                          size: 32,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              recipe.name,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'レシピ ${index + 1}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),
