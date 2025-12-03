@@ -11,9 +11,16 @@ class RecipeGenerateScreen extends StatefulWidget {
 
 class Recipe {
   final String name;
+  final String cookingTime;
+  final List<String> ingredients;
   final String fullContent;
 
-  Recipe({required this.name, required this.fullContent});
+  Recipe({
+    required this.name,
+    required this.cookingTime,
+    required this.ingredients,
+    required this.fullContent,
+  });
 }
 
 class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
@@ -45,7 +52,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
       final prompt = '''
 手元にある材料: ${_ingredientsController.text}
 
-あなたはユーザの料理を快適にサポートするプロの料理アシスタントです。
+あなたは様々な料理に詳しいプロの料理研究家です。
 入力された冷蔵庫の中身およびユーザの料理の好みに基づき、以下のルールに従って３つの料理を提案して下さい。
 ルール
 1.提案する料理は必ず入力された食材のみを使用し、基本的な調味料（砂糖、醤油、味噌、塩、酢、サラダ油、etc）は常備されているものとして無視してかまいません。
@@ -133,19 +140,68 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
       recipeBlocks.add(currentBlock.toString());
     }
 
-    // 各ブロックから料理名を抽出
+    // 各ブロックから料理名、調理時間、材料を抽出
     for (var block in recipeBlocks) {
       String recipeName = '生成されたレシピ';
+      String cookingTime = '不明';
+      List<String> ingredients = [];
       final blockLines = block.split('\n');
 
+      bool inIngredients = false;
+
       for (int i = 0; i < blockLines.length; i++) {
-        if (blockLines[i].contains('【料理名】') && i + 1 < blockLines.length) {
-          recipeName = blockLines[i + 1].trim();
-          break;
+        final line = blockLines[i].trim();
+
+        // 料理名の抽出
+        if (line.contains('【料理名】')) {
+          // 同じ行に料理名がある場合: 【料理名】親子丼
+          final sameLine = line.replaceFirst('【料理名】', '').trim();
+          if (sameLine.isNotEmpty) {
+            recipeName = sameLine;
+          } else if (i + 1 < blockLines.length) {
+            // 次の行に料理名がある場合
+            recipeName = blockLines[i + 1].trim();
+          }
+        }
+
+        // 調理時間の抽出
+        if (line.contains('【調理時間】')) {
+          // 同じ行に調理時間がある場合: 【調理時間】30分
+          final sameLine = line.replaceFirst('【調理時間】', '').trim();
+          if (sameLine.isNotEmpty) {
+            cookingTime = sameLine;
+          } else if (i + 1 < blockLines.length) {
+            // 次の行に調理時間がある場合
+            cookingTime = blockLines[i + 1].trim();
+          }
+        }
+
+        // 材料の抽出
+        if (line.contains('【材料】')) {
+          inIngredients = true;
+          continue;
+        }
+
+        if (inIngredients) {
+          // 次のセクション（【作り方】など）が始まったら終了
+          if (line.startsWith('【') && line.endsWith('】')) {
+            inIngredients = false;
+          } else if (line.startsWith('-') || line.startsWith('・')) {
+            // 材料行を追加（先頭の記号を除去）
+            final ingredient = line.replaceFirst(RegExp(r'^[-・]\s*'), '').trim();
+            if (ingredient.isNotEmpty) {
+              ingredients.add(ingredient);
+            }
+          }
         }
       }
 
-      recipes.add(Recipe(name: recipeName, fullContent: block));
+      recipes.add(Recipe(
+        name: recipeName,
+        cookingTime: cookingTime,
+        ingredients: ingredients,
+        fullContent: block,
+      ));
     }
 
     return recipes;
@@ -278,13 +334,67 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'レシピ ${index + 1}',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey.shade600,
-                                              ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.access_time,
+                                                  size: 16,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  recipe.cookingTime,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey.shade700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Wrap(
+                                              spacing: 4,
+                                              runSpacing: 4,
+                                              children: [
+                                                ...recipe.ingredients.take(3).map((ingredient) {
+                                                  return Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.orange.shade50,
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(
+                                                        color: Colors.orange.shade200,
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      ingredient.split(' ').first.split('　').first,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.orange.shade900,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }),
+                                                if (recipe.ingredients.length > 3)
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                    child: Text(
+                                                      '他${recipe.ingredients.length - 3}品',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey.shade600,
+                                                        fontStyle: FontStyle.italic,
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
                                           ],
                                         ),
