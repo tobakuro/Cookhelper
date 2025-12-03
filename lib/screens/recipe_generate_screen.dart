@@ -59,6 +59,9 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 2.調理時間は最長でも60分以内のものを提案してください。
 3.使いたい材料がある場合は優先して使ってください
 4.回答はユーザーが入力した言語に合わせてください
+5.必ず3つのレシピを「===レシピ1===」「===レシピ2===」「===レシピ3===」で区切ってください
+6.各レシピは10〜15ステップ程度に細かく分けてください
+7.調味料などを入れる際は必ず分量を記載してください
 以下の形式で提案してください：
 
 ===レシピ1===
@@ -77,7 +80,7 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 
 例：
 ステップ1: 玉ねぎを薄切りにします
-ステップ2: フライパンに油を引いて中火で熱します
+ステップ2: フライパンに油を大さじ1杯引いて中火で熱します
 ステップ3: 玉ねぎを入れて透明になるまで炒めます
 
 【ポイント】
@@ -88,11 +91,6 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
 
 ===レシピ3===
 （同じ形式で3つ目のレシピ）
-
-重要：
-- 必ず3つのレシピを「===レシピ1===」「===レシピ2===」「===レシピ3===」で区切ってください
-- 各レシピは10〜15ステップ程度に細かく分けてください
-- 日本語で、わかりやすく、料理初心者でも作れるように詳しく説明してください
 ''';
 
       final response = await _geminiService.generateContent(prompt);
