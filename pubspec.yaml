@@ -34,6 +34,25 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  
+  # Gemini Live API
+  gemini_live: ^0.1.1
+
+  # 環境変数
+  flutter_dotenv: ^6.0.0
+  google_generative_ai: ^0.4.7
+
+  # 音声録音と再生
+  record: ^6.1.2
+  permission_handler: ^12.0.1
+  path_provider: ^2.1.5
+  audioplayers: ^6.1.0
+
+  # テキスト読み上げ
+  flutter_tts: ^4.2.0
+
+  # 音声認識
+  speech_to_text: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -44,7 +63,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -58,9 +77,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
