@@ -118,18 +118,16 @@ URL: （レシピページのURL）
         currentUrl = trimmedLine.replaceFirst(RegExp(r'^URL[：:]\s*'), '').trim();
 
         // 3つの情報が揃ったらRecipeLinkを作成
-        if (currentName != null && currentSite != null && currentUrl != null) {
-          recipeLinks.add(RecipeLink(
-            name: currentName,
-            url: currentUrl,
-            site: currentSite,
-          ));
+        recipeLinks.add(RecipeLink(
+          name: currentName!,
+          url: currentUrl,
+          site: currentSite!,
+        ));
 
-          // リセット
-          currentName = null;
-          currentSite = null;
-          currentUrl = null;
-        }
+        // リセット
+        currentName = null;
+        currentSite = null;
+        currentUrl = null;
       }
     }
 

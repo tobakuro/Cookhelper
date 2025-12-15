@@ -33,8 +33,6 @@ class _CookingScreenState extends State<CookingScreen> {
   List<String> _ingredients = [];
   List<String> _tools = [];
   int _currentStepIndex = 0;
-  String _header = '';
-  String _footer = '';
 
   @override
   void initState() {
@@ -53,11 +51,7 @@ class _CookingScreenState extends State<CookingScreen> {
     final List<String> steps = [];
     final List<String> ingredients = [];
     final List<String> tools = [];
-    final StringBuffer headerBuffer = StringBuffer();
-    final StringBuffer footerBuffer = StringBuffer();
 
-    bool inSteps = false;
-    bool afterSteps = false;
     bool inIngredients = false;
 
     for (var line in lines) {
@@ -80,7 +74,6 @@ class _CookingScreenState extends State<CookingScreen> {
 
       // ステップの抽出
       if (trimmedLine.startsWith('ステップ')) {
-        inSteps = true;
         steps.add(trimmedLine);
 
         // ステップから器具を推測
@@ -99,13 +92,6 @@ class _CookingScreenState extends State<CookingScreen> {
         if (trimmedLine.contains('包丁') && !tools.contains('包丁')) {
           tools.add('包丁');
         }
-      } else if (inSteps && trimmedLine.isEmpty) {
-        afterSteps = true;
-        inSteps = false;
-      } else if (!inSteps && !afterSteps) {
-        headerBuffer.writeln(line);
-      } else if (afterSteps) {
-        footerBuffer.writeln(line);
       }
     }
 
@@ -113,8 +99,6 @@ class _CookingScreenState extends State<CookingScreen> {
       _steps = steps;
       _ingredients = ingredients.isEmpty ? ['材料情報なし'] : ingredients;
       _tools = tools.isEmpty ? ['包丁', 'まな板', 'ボウル'] : tools;
-      _header = headerBuffer.toString().trim();
-      _footer = footerBuffer.toString().trim();
       _currentStepIndex = 0;
     });
   }
