@@ -1,4 +1,4 @@
-name: cookhelper
+name: flutter_application_1
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,19 +34,18 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  
-  # Gemini Live API
-  gemini_live: ^0.1.1
-
-  # 環境変数
-  flutter_dotenv: ^6.0.0
+  # Gemini関連のパッケージ
+  record: ^6.1.2
+  path_provider: ^2.1.2
   google_generative_ai: ^0.4.7
 
-  # 音声録音と再生
-  record: ^6.1.2
-  permission_handler: ^12.0.1
-  path_provider: ^2.1.5
-  audioplayers: ^6.1.0
+  # 🛑 以下の不足していたパッケージを追記しました 🛑
+  audioplayers: ^6.0.0        # 音声再生機能
+  flutter_dotenv: ^6.0.0      # 環境変数(.env)の読み込み
+  permission_handler: ^12.0.0 # マイクなどの権限管理
+  # 以前のログで参照されていたパッケージ。
+  # コードが古い場合は必要です。新しいSDKに対応したバージョンを指定。
+  gemini_live: ^0.1.1 
 
 dev_dependencies:
   flutter_test:
@@ -71,8 +70,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - .env
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -86,16 +86,16 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

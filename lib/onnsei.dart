@@ -14,11 +14,11 @@ class RokuonPage extends StatefulWidget {
 }
 
 class _RokuonPageState extends State<RokuonPage> {
-  // ˜^‰¹ó‘Ô‚ğŠÇ—‚·‚éRecorderƒCƒ“ƒXƒ^ƒ“ƒX
+  // éŒ²éŸ³çŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹Recorderã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
   final _audioRecorder = AudioRecorder();
   String? _audioPath;
   bool _isRecording = false;
-  String _response = "‚±‚±‚ÉGemini‚©‚ç‚Ì‰“š‚ª•\¦‚³‚ê‚Ü‚·B";
+  String _response = "ã“ã“ã«Geminiã‹ã‚‰ã®å¿œç­”ãŒè¡¨ç¤ºã•ã‚Œã¾ã™ã€‚";
 
   @override
   void dispose() {
@@ -26,38 +26,38 @@ class _RokuonPageState extends State<RokuonPage> {
     super.dispose();
   }
 
-  // ˜^‰¹ŠJn
+  // éŒ²éŸ³é–‹å§‹
   Future<void> _startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
         final Directory appTempDir = await getTemporaryDirectory();
-        // ˜^‰¹ƒtƒ@ƒCƒ‹‚ÌƒpƒX‚ğƒ†ƒj[ƒN‚Éİ’è
+        // éŒ²éŸ³ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹ã‚’ãƒ¦ãƒ‹ãƒ¼ã‚¯ã«è¨­å®š
         _audioPath = '${appTempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
 
-        // ˜^‰¹İ’è
+        // éŒ²éŸ³è¨­å®š
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc, sampleRate: 16000), // •i¿Œüã‚Ì‚½‚ßsampleRate‚ğ’Ç‰Á
+          const RecordConfig(encoder: AudioEncoder.aacLc, sampleRate: 16000), // å“è³ªå‘ä¸Šã®ãŸã‚sampleRateã‚’è¿½åŠ 
           path: _audioPath!,
         );
 
         setState(() {
           _isRecording = true;
-          _response = "˜^‰¹’†...";
+          _response = "éŒ²éŸ³ä¸­...";
         });
       } else {
         setState(() {
-          _response = "ƒ}ƒCƒN‚Ìg—p‹–‰Â‚ª“¾‚ç‚ê‚Ü‚¹‚ñ‚Å‚µ‚½B";
+          _response = "ãƒã‚¤ã‚¯ã®ä½¿ç”¨è¨±å¯ãŒå¾—ã‚‰ã‚Œã¾ã›ã‚“ã§ã—ãŸã€‚";
         });
       }
     } catch (e) {
       setState(() {
-        _response = "˜^‰¹ŠJnƒGƒ‰[: $e";
+        _response = "éŒ²éŸ³é–‹å§‹ã‚¨ãƒ©ãƒ¼: $e";
       });
-      print('˜^‰¹ŠJnƒGƒ‰[: $e');
+      print('éŒ²éŸ³é–‹å§‹ã‚¨ãƒ©ãƒ¼: $e');
     }
   }
 
-  // ˜^‰¹’â~
+  // éŒ²éŸ³åœæ­¢
   Future<void> _stopRecording() async {
     try {
       final String? path = await _audioRecorder.stop();
@@ -65,39 +65,39 @@ class _RokuonPageState extends State<RokuonPage> {
         setState(() {
           _isRecording = false;
           _audioPath = path;
-          _response = "˜^‰¹‚ªŠ®—¹‚µ‚Ü‚µ‚½B‰¹º‚ğ•ªÍ’†...";
+          _response = "éŒ²éŸ³ãŒå®Œäº†ã—ã¾ã—ãŸã€‚éŸ³å£°ã‚’åˆ†æä¸­...";
         });
         await _sendAudioToGemini(path);
       } else {
         setState(() {
           _isRecording = false;
-          _response = "˜^‰¹’â~ƒGƒ‰[: ƒtƒ@ƒCƒ‹ƒpƒX‚ªæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B";
+          _response = "éŒ²éŸ³åœæ­¢ã‚¨ãƒ©ãƒ¼: ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ãŒå–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚";
         });
       }
     } catch (e) {
       setState(() {
         _isRecording = false;
-        _response = "˜^‰¹’â~ƒGƒ‰[: $e";
+        _response = "éŒ²éŸ³åœæ­¢ã‚¨ãƒ©ãƒ¼: $e";
       });
-      print('˜^‰¹’â~ƒGƒ‰[: $e');
+      print('éŒ²éŸ³åœæ­¢ã‚¨ãƒ©ãƒ¼: $e');
     }
   }
 
-  // Gemini‚É‰¹º‚ğ‘—M
+  // Geminiã«éŸ³å£°ã‚’é€ä¿¡
   Future<void> _sendAudioToGemini(String path) async {
     try {
-      // APIƒL[‚ÍˆÀ‘S‚È•û–@‚ÅŠÇ—‚µ‚Ä‚­‚¾‚³‚¢
+
       const apiKey = String.fromEnvironment('GEMINI_API_KEY');
       if (apiKey.isEmpty) {
         setState(() {
-          _response = "ƒGƒ‰[: APIƒL[‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñBi—á: --dart-define=GEMINI_API_KEY=YOUR_KEYj";
+          _response = "ã‚¨ãƒ©ãƒ¼: APIã‚­ãƒ¼ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚ï¼ˆä¾‹: --dart-define=GEMINI_API_KEY=YOUR_KEYï¼‰";
         });
         return;
       }
 
-      // ˆ—’†‚ÌƒƒbƒZ[ƒW‚ğXV
+      // å‡¦ç†ä¸­ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’æ›´æ–°
       setState(() {
-        _response = "Geminiƒ‚ƒfƒ‹‚ª‰¹º‚ğ•ªÍ‚µ‚Ä‚¢‚Ü‚·...";
+        _response = "Geminiãƒ¢ãƒ‡ãƒ«ãŒéŸ³å£°ã‚’åˆ†æã—ã¦ã„ã¾ã™...";
       });
 
       final model = GenerativeModel(
@@ -108,19 +108,19 @@ class _RokuonPageState extends State<RokuonPage> {
       final audioFile = File(path);
       final audioBytes = await audioFile.readAsBytes();
 
-      // AudioPart‚ÆTextPart‚Ìì¬
+      // AudioPartã¨TextPartã®ä½œæˆ
       final audioPart = DataPart(
-        'audio/aac', // ˜^‰¹İ’è‚É‡‚í‚¹‚½MIMEƒ^ƒCƒv
+        'audio/aac', // éŒ²éŸ³è¨­å®šã«åˆã‚ã›ãŸMIMEã‚¿ã‚¤ãƒ—
         Uint8List.fromList(audioBytes),
       );
 
-      final promptPart = TextPart("‚±‚Ì‰¹ºƒtƒ@ƒCƒ‹‚Ì“à—e‚ğ•ªÍ‚µA“ú–{Œê‚Å•Ô“š‚µ‚Ä‚­‚¾‚³‚¢B");
+      final promptPart = TextPart("ã“ã®éŸ³å£°ãƒ•ã‚¡ã‚¤ãƒ«ã®å†…å®¹ã‚’åˆ†æã—ã€æ—¥æœ¬èªã§è¿”ç­”ã—ã¦ãã ã•ã„ã€‚");
 
-      // ? yC³‰ÓŠzContentƒRƒ“ƒXƒgƒ‰ƒNƒ^‚ğ (role, parts) ‚ÌˆÊ’uˆø”‚É•ÏX‚µAŒ^‚ğ–¾¦‚·‚é
+      // ? ã€ä¿®æ­£ç®‡æ‰€ã€‘Contentã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã‚’ (role, parts) ã®ä½ç½®å¼•æ•°ã«å¤‰æ›´ã—ã€å‹ã‚’æ˜ç¤ºã™ã‚‹
       final List<Content> contents = [
         Content(
-          'user', // 1. role ('user') ‚ğˆÊ’uˆø”‚Æ‚µ‚Ä“n‚·
-          [ // 2. parts ‚ÌƒŠƒXƒg ([audioPart, promptPart]) ‚ğˆÊ’uˆø”‚Æ‚µ‚Ä“n‚·
+          'user', // 1. role ('user') ã‚’ä½ç½®å¼•æ•°ã¨ã—ã¦æ¸¡ã™
+          [ // 2. parts ã®ãƒªã‚¹ãƒˆ ([audioPart, promptPart]) ã‚’ä½ç½®å¼•æ•°ã¨ã—ã¦æ¸¡ã™
             audioPart,
             promptPart,
           ],
@@ -130,17 +130,17 @@ class _RokuonPageState extends State<RokuonPage> {
       final response = await model.generateContent(contents);
 
       setState(() {
-        _response = response.text ?? "Gemini‚©‚ç‚Ì‰“š‚ª‚ ‚è‚Ü‚¹‚ñ‚Å‚µ‚½B";
+        _response = response.text ?? "Geminiã‹ã‚‰ã®å¿œç­”ãŒã‚ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚";
       });
 
-      // ‰“šŒãAƒtƒ@ƒCƒ‹‚ğíœ
+      // å¿œç­”å¾Œã€ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤
       audioFile.delete();
 
     } catch (e) {
       setState(() {
-        _response = "Gemini‚Æ‚Ì’ÊMƒGƒ‰[: $e";
+        _response = "Geminiã¨ã®é€šä¿¡ã‚¨ãƒ©ãƒ¼: $e";
       });
-      print('GeminiƒGƒ‰[: $e');
+      print('Geminiã‚¨ãƒ©ãƒ¼: $e');
     }
   }
 
@@ -148,7 +148,7 @@ class _RokuonPageState extends State<RokuonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gemini‰¹º•ªÍ'),
+        title: const Text('GeminiéŸ³å£°åˆ†æ'),
       ),
       body: Center(
         child: Padding(
@@ -156,7 +156,7 @@ class _RokuonPageState extends State<RokuonPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // ‰“šƒƒbƒZ[ƒW•\¦ƒGƒŠƒA
+              // å¿œç­”ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸è¡¨ç¤ºã‚¨ãƒªã‚¢
               Card(
                 elevation: 4,
                 child: Container(
@@ -172,7 +172,7 @@ class _RokuonPageState extends State<RokuonPage> {
                 ),
               ),
               const SizedBox(height: 40),
-              // ˜^‰¹ƒ{ƒ^ƒ“
+              // éŒ²éŸ³ãƒœã‚¿ãƒ³
               GestureDetector(
                 onTap: _isRecording ? _stopRecording : _startRecording,
                 child: Container(
@@ -198,7 +198,7 @@ class _RokuonPageState extends State<RokuonPage> {
               ),
               const SizedBox(height: 20),
               Text(
-                _isRecording ? 'ƒ^ƒbƒv‚µ‚Ä˜^‰¹‚ğI—¹' : 'ƒ^ƒbƒv‚µ‚Ä˜^‰¹‚ğŠJn',
+                _isRecording ? 'ã‚¿ãƒƒãƒ—ã—ã¦éŒ²éŸ³ã‚’çµ‚äº†' : 'ã‚¿ãƒƒãƒ—ã—ã¦éŒ²éŸ³ã‚’é–‹å§‹',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

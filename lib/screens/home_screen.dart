@@ -4,6 +4,8 @@ import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
 import 'cooking_screen.dart';
 import 'audio_record_test_screen.dart';
+// ★ 1. GoogleLiveAPITestScreen のインポートを追加
+import 'google_live_api_test_screen.dart'; 
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,8 +18,10 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
+      // Scrollableにするため、CenterをListViewに変更することが推奨されますが、
+      // 今回は既存の構造に合わせてColumnにメニューを追加します。
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView( // ★ 項目が増えたため、スクロール可能にする
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -37,13 +41,16 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                '手を使わず、音声でレシピをナビゲート',
+                '食材を検索、音声でレシピを操作',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 48),
+              
+              // --- 既存のメニュー ---
+              // レシピ検索
               _buildMenuButton(
                 context,
                 icon: Icons.search,
@@ -59,11 +66,13 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
+
+              // レシピ生成
               _buildMenuButton(
                 context,
                 icon: Icons.auto_awesome,
                 label: 'レシピ生成',
-                description: '材料からレシピを作成',
+                description: '手持ちからレシピを作成',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -74,11 +83,13 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
+
+              // 音声操作モード
               _buildMenuButton(
                 context,
                 icon: Icons.mic,
-                label: '音声調理モード',
-                description: 'ハンズフリーで調理',
+                label: '音声操作モード',
+                description: 'ハンズフリーで操作',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -89,6 +100,8 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
+
+              // お気に入り
               _buildMenuButton(
                 context,
                 icon: Icons.favorite,
@@ -104,6 +117,8 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
+
+              // 音声録音テスト
               _buildMenuButton(
                 context,
                 icon: Icons.mic_external_on,
@@ -118,6 +133,25 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
               ),
+              const SizedBox(height: 16),
+              
+              // ★ 2. 新しいメニューボタンの追加
+              _buildMenuButton(
+                context,
+                icon: Icons.cloud_upload, // API接続を示すアイコン
+                label: 'Google Live API テスト', 
+                description: 'リアルタイム音声認識の接続テスト', 
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GoogleLiveAPITestScreen(),
+                    ),
+                  );
+                },
+              ),
+              // --- メニュー終わり ---
+
             ],
           ),
         ),
@@ -125,6 +159,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // _buildMenuButtonメソッドは省略
   Widget _buildMenuButton(
     BuildContext context, {
     required IconData icon,
@@ -132,6 +167,7 @@ class HomeScreen extends StatelessWidget {
     required String description,
     required VoidCallback onTap,
   }) {
+    // ... (元の _buildMenuButton の実装)
     return Card(
       elevation: 2,
       child: InkWell(

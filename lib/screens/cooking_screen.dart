@@ -31,7 +31,7 @@ class _CookingScreenState extends State<CookingScreen> {
       await _geminiService.connect();
       setState(() {
         _isConnected = true;
-        _messages.add('[システム] 接続しました');
+        _messages.add('[シス�?�?] 接続しました');
       });
     } catch (e) {
       setState(() {
@@ -48,14 +48,14 @@ class _CookingScreenState extends State<CookingScreen> {
     await _geminiService.disconnect();
     setState(() {
       _isConnected = false;
-      _messages.add('[システム] 切断しました');
+      _messages.add('[シス�?�?] �?断しました');
     });
   }
 
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('メッセージを入力してください')),
+        const SnackBar(content: Text('メ�?セージを�?�力してください')),
       );
       return;
     }
@@ -80,7 +80,7 @@ class _CookingScreenState extends State<CookingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gemini Live API テスト'),
+        title: const Text('Gemini Live API �?ス�?'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
@@ -104,7 +104,7 @@ class _CookingScreenState extends State<CookingScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _isConnected ? '接続中' : '未接続',
+                          _isConnected ? '接続中' : '未接�?',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: _isConnected ? Colors.green : Colors.grey,
@@ -122,7 +122,7 @@ class _CookingScreenState extends State<CookingScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Text(_isConnected ? '切断' : '接続'),
+                          : Text(_isConnected ? '�?断' : '接�?'),
                     ),
                   ],
                 ),
@@ -130,15 +130,15 @@ class _CookingScreenState extends State<CookingScreen> {
             ),
             const SizedBox(height: 16),
 
-            // メッセージ送信欄
+            // メ�?セージ送信�?
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: const InputDecoration(
-                      labelText: 'メッセージ',
-                      hintText: 'Gemini Live APIに送信するメッセージ',
+                      labelText: 'メ�?セージ',
+                      hintText: 'Gemini Live APIに送信するメ�?セージ',
                       border: OutlineInputBorder(),
                     ),
                     onSubmitted: (_) => _sendMessage(),
@@ -156,9 +156,9 @@ class _CookingScreenState extends State<CookingScreen> {
             ),
             const SizedBox(height: 24),
 
-            // メッセージ履歴
+            // メ�?セージ履歴
             const Text(
-              'メッセージ履歴',
+              'メ�?セージ履歴',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -185,7 +185,7 @@ class _CookingScreenState extends State<CookingScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              '接続してメッセージを送信してください',
+                              '接続してメ�?セージを送信してください',
                               style: TextStyle(
                                 color: Colors.grey.shade600,
                                 fontSize: 16,
@@ -207,7 +207,7 @@ class _CookingScreenState extends State<CookingScreen> {
                                 height: 1.5,
                                 color: _messages[index].startsWith('[エラー]')
                                     ? Colors.red
-                                    : _messages[index].startsWith('[システム]')
+                                    : _messages[index].startsWith('[シス�?�?]')
                                         ? Colors.blue
                                         : Colors.black87,
                               ),
