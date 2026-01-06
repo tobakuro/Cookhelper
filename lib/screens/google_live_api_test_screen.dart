@@ -1,212 +1,155 @@
-import 'dart:io';
+﻿import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GoogleLiveAPITestScreen extends StatefulWidget {
   const GoogleLiveAPITestScreen({super.key});
 
   @override
-  State<GoogleLiveAPITestScreen> createState() => _RokuonPageState();
+  State<GoogleLiveAPITestScreen> createState() => _GoogleLiveAPITestScreenState();
 }
 
-class _RokuonPageState extends State<GoogleLiveAPITestScreen> {
-  // 録音状態を管理するRecorderインスタンス
-  final _audioRecorder = AudioRecorder();
-  String? _audioPath;
-  bool _isRecording = false;
-  String _response = "ここにGeminiからの応答が表示されます。";
+class _GoogleLiveAPITestScreenState extends State<GoogleLiveAPITestScreen> {
+  final AudioRecorder _recorder = AudioRecorder();
+  WebSocketChannel? _channel;
+  bool _isListening = false;
+  int _value = 0;
+  String _lastCommand = '---';
 
   @override
   void dispose() {
-    _audioRecorder.dispose();
+    _recorder.dispose();
+    _channel?.sink.close();
     super.dispose();
   }
 
-  // 録音開始
-  Future<void> _startRecording() async {
-    try {
-      if (await _audioRecorder.hasPermission()) {
-        final Directory appTempDir = await getTemporaryDirectory();
-        // 録音ファイルのパスをユニークに設定
-        _audioPath = '${appTempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
+  // ===== Gemini Live APIに接続 =====
+  Future<void> _connectToGemini() async {
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    final uri = Uri.parse(
+        'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=$apiKey');
 
-        // 録音設定
-        await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc, sampleRate: 16000), // 品質向上のためsampleRateを追加
-          path: _audioPath!,
-        );
+    _channel = WebSocketChannel.connect(uri);
 
-        setState(() {
-          _isRecording = true;
-          _response = "録音中...";
-        });
-      } else {
-        setState(() {
-          _response = "マイクの使用許可が得られませんでした。";
-        });
+    _channel!.stream.listen((message) {
+      try {
+        String jsonString;
+        if (message is Uint8List) {
+          jsonString = utf8.decode(message);
+        } else {
+          jsonString = message;
+        }
+
+        final data = jsonDecode(jsonString);
+        
+        // デバッグ用にログを出すと安心です
+        debugPrint("受信データ: $jsonString");
+
+        // ToolCallが含まれているかチェック
+        if (data['toolCall'] != null) {
+          final calls = data['toolCall']['functionCalls'] as List;
+          for (var call in calls) {
+            _handleVoiceCommand(call['name']);
+          }
+        }
+      } catch (e) {
+        debugPrint("受信データ解析エラー: $e");
       }
-    } catch (e) {
-      setState(() {
-        _response = "録音開始エラー: $e";
-      });
-      print('録音開始エラー: $e');
-    }
+    });
+
+    // --- ここが重要：Geminiへの強力な指示を追加 ---
+    final setup = {
+      "setup": {
+        "model": "models/gemini-2.0-flash-exp",
+        "system_instruction": {
+          "parts": [
+            {
+              "text": "あなたは数値操作アシスタントです。ユーザーが『次』『進む』『プラス』などの意図を示したら、必ず『next』関数を呼び出してください。余計な言葉は一切返さず、関数呼び出しのみを行ってください。何回続いても同じです。"
+            }
+          ]
+        },
+        "tools": [{
+          "function_declarations": [
+            {"name": "next", "description": "数値を1増やします。"},
+            {"name": "prev", "description": "数値を1減らします。"}
+          ]
+        }]
+      }
+    };
+    _channel!.sink.add(jsonEncode(setup));
   }
 
-  // 録音停止
-  Future<void> _stopRecording() async {
-    try {
-      final String? path = await _audioRecorder.stop();
-      if (path != null) {
-        setState(() {
-          _isRecording = false;
-          _audioPath = path;
-          _response = "録音が完了しました。音声を分析中...";
-        });
-        await _sendAudioToGemini(path);
-      } else {
-        setState(() {
-          _isRecording = false;
-          _response = "録音停止エラー: ファイルパスが取得できませんでした。";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isRecording = false;
-        _response = "録音停止エラー: $e";
-      });
-      print('録音停止エラー: $e');
+  // ===== 音声入力開始 =====
+  Future<void> _startListening() async {
+    if (!await _recorder.hasPermission()) return;
+
+    if (_channel == null) {
+      await _connectToGemini();
     }
+
+    // recordパッケージ最新版の書き方
+    final stream = await _recorder.startStream(const RecordConfig(
+      encoder: AudioEncoder.pcm16bits, 
+      sampleRate: 16000,
+      numChannels: 1,
+    ));
+
+    setState(() {
+      _isListening = true;
+    });
+
+    stream.listen((Uint8List pcm) {
+      if (_channel != null) {
+        final b64Data = base64Encode(pcm);
+        final audioMessage = {
+          "realtime_input": {
+            "media_chunks": [
+              {"data": b64Data, "mime_type": "audio/pcm"}
+            ]
+          }
+        };
+        _channel!.sink.add(jsonEncode(audioMessage));
+      }
+    });
   }
 
-  // Geminiに音声を送信
-  Future<void> _sendAudioToGemini(String path) async {
-    try {
+  Future<void> _stopListening() async {
+    await _recorder.stop();
+    setState(() => _isListening = false);
+  }
 
-      const apiKey = String.fromEnvironment('GEMINI_API_KEY');
-      if (apiKey.isEmpty) {
-        setState(() {
-          _response = "エラー: APIキーが設定されていません。（例: --dart-define=GEMINI_API_KEY=YOUR_KEY）";
-        });
-        return;
-      }
-
-      // 処理中のメッセージを更新
-      setState(() {
-        _response = "Geminiモデルが音声を分析しています...";
-      });
-
-      final model = GenerativeModel(
-        model: 'gemini-2.5-flash',
-        apiKey: apiKey,
-      );
-
-      final audioFile = File(path);
-      final audioBytes = await audioFile.readAsBytes();
-
-      // AudioPartとTextPartの作成
-      final audioPart = DataPart(
-        'audio/aac', // 録音設定に合わせたMIMEタイプ
-        Uint8List.fromList(audioBytes),
-      );
-
-      final promptPart = TextPart("この音声ファイルの内容を分析し、日本語で返答してください。");
-
-      // ? 【修正箇所】Contentコンストラクタを (role, parts) の位置引数に変更し、型を明示する
-      final List<Content> contents = [
-        Content(
-          'user', // 1. role ('user') を位置引数として渡す
-          [ // 2. parts のリスト ([audioPart, promptPart]) を位置引数として渡す
-            audioPart,
-            promptPart,
-          ],
-        ),
-      ];
-
-      final response = await model.generateContent(contents);
-
-      setState(() {
-        _response = response.text ?? "Geminiからの応答がありませんでした。";
-      });
-
-      // 応答後、ファイルを削除
-      audioFile.delete();
-
-    } catch (e) {
-      setState(() {
-        _response = "Geminiとの通信エラー: $e";
-      });
-      print('Geminiエラー: $e');
-    }
+  void _handleVoiceCommand(String intent) {
+    setState(() {
+      _lastCommand = intent;
+      if (intent == 'next') _value++;
+      if (intent == 'prev') _value--;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gemini音声分析'),
-      ),
+      appBar: AppBar(title: const Text('Gemini Live 操作テスト')),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // 応答メッセージ表示エリア
-              Card(
-                elevation: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  width: double.infinity,
-                  constraints: const BoxConstraints(minHeight: 150),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      _response,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('現在の数値', style: TextStyle(fontSize: 16)),
+            Text('$_value', style: TextStyle(fontSize: 80, fontWeight: FontWeight.bold)),
+            Text('最後の命令: $_lastCommand'),
+            const SizedBox(height: 40),
+            GestureDetector(
+              onTap: _isListening ? _stopListening : _startListening,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: _isListening ? Colors.red : Colors.blue,
+                child: Icon(_isListening ? Icons.stop : Icons.mic, color: Colors.white, size: 50),
               ),
-              const SizedBox(height: 40),
-              // 録音ボタン
-              GestureDetector(
-                onTap: _isRecording ? _stopRecording : _startRecording,
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    color: _isRecording ? Colors.redAccent : Colors.blueAccent,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: _isRecording ? Colors.red.withOpacity(0.5) : Colors.blue.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _isRecording ? Icons.stop : Icons.mic,
-                    color: Colors.white,
-                    size: 60,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _isRecording ? 'タップして録音を終了' : 'タップして録音を開始',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _isRecording ? Colors.red : Colors.blue,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
