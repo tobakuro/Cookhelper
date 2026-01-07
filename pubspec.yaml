@@ -38,6 +38,12 @@ dependencies:
   # 音声認識
   speech_to_text: ^7.0.0
 
+  # URL起動
+  url_launcher: ^6.3.1
+
+  # 共有機能
+  share_plus: ^10.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
