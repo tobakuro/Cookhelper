@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/home_screen.dart';
+import 'screens/timer.dart';
 
 Future main() async {
     // .envファイルを読み込み

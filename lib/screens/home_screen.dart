@@ -4,6 +4,7 @@ import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
 import 'cooking_screen.dart';
 import 'audio_record_test_screen.dart';
+import 'timer_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -29,7 +30,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                '料理をもっと楽しく!',
+                '料理をもっと楽しく！',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -37,18 +38,19 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                '手を使わず、音声でレシピをナビゲート',
+                '食材を使って、音声でレシピをナビゲート',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 48),
+
               _buildMenuButton(
                 context,
                 icon: Icons.search,
                 label: 'レシピ検索',
-                description: '料理名で検索',
+                description: '料理名や食材から検索',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -58,62 +60,87 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
               ),
+
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
                 icon: Icons.auto_awesome,
                 label: 'レシピ生成',
-                description: '材料からレシピを作成',
+                description: '余った食材からレシピを提案',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const RecipeGenerateScreen(),
+                      builder: (context) =>
+                          const RecipeGenerateScreen(),
                     ),
                   );
                 },
               ),
+
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
                 icon: Icons.mic,
-                label: '音声調理モード',
-                description: 'ハンズフリーで調理',
+                label: '音声操作モード',
+                description: 'ハンズフリーで料理を進める',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CookingScreen(),
+                      builder: (context) =>
+                          const CookingScreen(),
                     ),
                   );
                 },
               ),
+
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
                 icon: Icons.favorite,
                 label: 'お気に入り',
-                description: '保存したレシピ',
+                description: '保存したレシピ一覧',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FavoritesScreen(),
+                      builder: (context) =>
+                          const FavoritesScreen(),
                     ),
                   );
                 },
               ),
+
               const SizedBox(height: 16),
               _buildMenuButton(
                 context,
                 icon: Icons.mic_external_on,
                 label: '音声録音テスト',
-                description: 'マイク録音機能のテスト',
+                description: 'マイク入力の動作確認',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AudioRecordTestScreen(),
+                      builder: (context) =>
+                          const AudioRecordTestScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                icon: Icons.timer,
+                label: 'タイマーテスト',
+                description: 'アラーム・タイマー機能の確認',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const AlarmTimer(),
                     ),
                   );
                 },
@@ -144,19 +171,23 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
                   size: 32,
-                  color: Theme.of(context).colorScheme.primary,
+                  color:
+                      Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Text(
                       label,
