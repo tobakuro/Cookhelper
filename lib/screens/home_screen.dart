@@ -6,6 +6,7 @@ import 'cooking_screen.dart';
 import 'audio_record_test_screen.dart';
 // 笘� 1. GoogleLiveAPITestScreen 縺ｮ繧､繝ｳ繝昴�ｼ繝医ｒ霑ｽ蜉�
 import 'google_live_api_test_screen.dart'; 
+import 'gemini_live_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -90,11 +91,14 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.mic,
                 label: '髻ｳ螢ｰ謫堺ｽ懊Δ繝ｼ繝�',
                 description: '繝上Φ繧ｺ繝輔Μ繝ｼ縺ｧ謫堺ｽ�',
+                icon: Icons.science,
+                label: 'Gemini Live テスト',
+                description: 'Gemini Live API接続テスト',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CookingScreen(),
+                      builder: (context) => const GeminiLiveTestScreen(),
                     ),
                   );
                 },

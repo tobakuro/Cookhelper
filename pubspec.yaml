@@ -32,6 +32,12 @@ dependencies:
   # Live API以外（チャットや画像解析）で使う場合に残しておきます
   google_generative_ai: ^0.4.7
 
+  # テキスト読み上げ
+  flutter_tts: ^4.2.0
+
+  # 音声認識
+  speech_to_text: ^7.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
