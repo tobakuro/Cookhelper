@@ -86,12 +86,13 @@ URL: （レシピページのURL）
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('エラーが発生しました: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラーが発生しました: $e')),
+        );
+      }
     }
   }
-
   List<RecipeLink> _parseRecipeLinks(String response) {
     final List<RecipeLink> recipeLinks = [];
     final lines = response.split('\n');

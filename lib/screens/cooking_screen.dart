@@ -112,7 +112,7 @@ class _CookingScreenState extends State<CookingScreen> {
       // 音声認識の初期化（Web版ではパーミッション処理をスキップ）
       bool available = await _speechToText.initialize(
         onError: (error) {
-          print('🔴 音声認識エラー: ${error.errorMsg}'); // デバッグログ
+          debugPrint('🔴 音声認識エラー: ${error.errorMsg}'); // デバッグログ
           if (mounted) {
             setState(() {
               _lastError = '音声認識エラー: ${error.errorMsg}';
@@ -121,12 +121,12 @@ class _CookingScreenState extends State<CookingScreen> {
           }
         },
         onStatus: (status) {
-          print('🔵 音声認識ステータス: $status'); // デバッグログ
+          debugPrint('🔵 音声認識ステータス: $status'); // デバッグログ
           // 調理ページにいる間は常に音声認識を再開
           if (status == 'notListening' && _isOnCookingPage && mounted) {
             Future.delayed(const Duration(milliseconds: 500), () {
               if (_isOnCookingPage && !_isListening && mounted) {
-                print('🟢 音声認識を再開します'); // デバッグログ
+                debugPrint('🟢 音声認識を再開します'); // デバッグログ
                 _startListening();
               }
             });
@@ -134,7 +134,7 @@ class _CookingScreenState extends State<CookingScreen> {
         },
       );
 
-      print('🟡 音声認識初期化完了: available=$available'); // デバッグログ
+      debugPrint('🟡 音声認識初期化完了: available=$available'); // デバッグログ
       if (mounted) {
         setState(() {
           _speechAvailable = available;
@@ -146,7 +146,7 @@ class _CookingScreenState extends State<CookingScreen> {
         });
       }
     } catch (e) {
-      print('🔴 音声認識初期化失敗: $e'); // デバッグログ
+      debugPrint('🔴 音声認識初期化失敗: $e'); // デバッグログ
       if (mounted) {
         setState(() {
           _lastError = '音声認識の初期化に失敗しました: $e';
@@ -449,15 +449,6 @@ class _CookingScreenState extends State<CookingScreen> {
       debugPrint('📝 最終結果を処理: $recognizedText');
       // ステップ2: コマンド実行 (Intent Matching)
       _executeVoiceCommand(recognizedText);
-    }
-  }
-
-  Future<void> _stopListening() async {
-    await _speechToText.stop();
-    if (mounted) {
-      setState(() {
-        _isListening = false;
-      });
     }
   }
 
