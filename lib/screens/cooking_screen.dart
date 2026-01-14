@@ -367,70 +367,88 @@ class _CookingScreenState extends State<CookingScreen> {
     );
   }
 
+  // ステップ1: 音声をテキストに変換 (Speech-to-Text)
   Future<void> _startListening() async {
-    print('🎤 _startListening 呼び出し: speechAvailable=$_speechAvailable, isOnCookingPage=$_isOnCookingPage'); // デバッグログ
+    debugPrint('🎤 音声認識開始: speechAvailable=$_speechAvailable, isOnCookingPage=$_isOnCookingPage');
 
     if (!_speechAvailable || !_isOnCookingPage) {
-      print('⚠️ 音声認識開始条件を満たしていません'); // デバッグログ
+      debugPrint('⚠️ 音声認識開始条件を満たしていません');
       return;
     }
 
-    if (!_isListening) {
-      print('✅ 音声認識を開始します'); // デバッグログ
-      setState(() {
-        _isListening = true;
-        _recognizedText = '';
-        _lastError = '';
-      });
+    if (_isListening) {
+      debugPrint('⚠️ 既に音声認識が実行中です');
+      return;
+    }
 
-      try {
-        // 利用可能なロケールを確認
-        final locales = await _speechToText.locales();
-        print('📋 利用可能なロケール: ${locales.map((l) => l.localeId).join(", ")}');
+    setState(() {
+      _isListening = true;
+      _recognizedText = '';
+      _lastError = '';
+    });
 
-        // デフォルトロケール（英語）でテスト - Web版では日本語が動作しない可能性がある
-        final useLocale = 'en_US'; // テスト用に英語を使用
-        print('🌐 使用するロケール: $useLocale');
+    try {
+      // 利用可能なロケールを取得
+      final locales = await _speechToText.locales();
+      debugPrint('📋 利用可能なロケール: ${locales.map((l) => l.localeId).take(5).join(", ")}...');
 
-        await _speechToText.listen(
-          onResult: (result) {
-            print('🎙️ 音声認識結果: "${result.recognizedWords}" (final=${result.finalResult}, confidence=${result.confidence})'); // デバッグログ
-            if (mounted) {
-              setState(() {
-                _recognizedText = result.recognizedWords;
-              });
-              if (result.finalResult && result.recognizedWords.isNotEmpty) {
-                // 「ヘルパー」が含まれている場合のみコマンドを処理
-                print('📝 最終結果を処理: ${result.recognizedWords}'); // デバッグログ
-                _processVoiceCommand(_recognizedText);
-              }
-            }
-          },
-          onSoundLevelChange: (level) {
-            // 音声レベルをログ出力（デバッグ用）
-            print('🔊 音声レベル: $level');
-          },
-          localeId: useLocale,
-          listenOptions: SpeechListenOptions(
-            partialResults: true,
-            cancelOnError: false,
-            listenMode: ListenMode.confirmation,
-          ),
-          pauseFor: const Duration(seconds: 5),
-          listenFor: const Duration(seconds: 60),
-        );
-        print('🎧 音声認識リスニング開始完了'); // デバッグログ
-      } catch (e) {
-        print('🔴 音声認識開始エラー: $e'); // デバッグログ
-        if (mounted) {
-          setState(() {
-            _lastError = '音声認識の開始に失敗しました: $e';
-            _isListening = false;
-          });
-        }
+      // 日本語ロケールを探す
+      String localeId = 'ja_JP';
+      final hasJapanese = locales.any((l) =>
+        l.localeId.startsWith('ja') || l.localeId.contains('JP'));
+
+      if (!hasJapanese) {
+        // 日本語がない場合は英語を使用
+        localeId = 'en_US';
+        debugPrint('⚠️ 日本語ロケールが見つかりません。英語を使用します');
       }
-    } else {
-      print('⚠️ 既に音声認識が実行中です'); // デバッグログ
+
+      debugPrint('🌐 使用するロケール: $localeId');
+
+      // 音声認識を開始
+      await _speechToText.listen(
+        onResult: (result) {
+          _onSpeechResult(result);
+        },
+        localeId: localeId,
+        listenOptions: SpeechListenOptions(
+          partialResults: true,
+          onDevice: false,
+          cancelOnError: false,
+          listenMode: ListenMode.confirmation,
+        ),
+        pauseFor: const Duration(seconds: 3),
+        listenFor: const Duration(seconds: 30),
+      );
+
+      debugPrint('✅ 音声認識リスニング開始完了');
+    } catch (e) {
+      debugPrint('🔴 音声認識開始エラー: $e');
+      if (mounted) {
+        setState(() {
+          _lastError = '音声認識エラー: $e';
+          _isListening = false;
+        });
+      }
+    }
+  }
+
+  // 音声認識結果のコールバック
+  void _onSpeechResult(dynamic result) {
+    if (!mounted) return;
+
+    final recognizedText = result.recognizedWords as String;
+    debugPrint('🎙️ 認識: "$recognizedText" (final=${result.finalResult})');
+
+    setState(() {
+      _recognizedText = recognizedText;
+    });
+
+    // 最終結果のみ処理
+    if (result.finalResult && recognizedText.isNotEmpty) {
+      debugPrint('📝 最終結果を処理: $recognizedText');
+      // ステップ2: コマンド実行 (Intent Matching)
+      _executeVoiceCommand(recognizedText);
     }
   }
 
@@ -443,82 +461,92 @@ class _CookingScreenState extends State<CookingScreen> {
     }
   }
 
-  void _processVoiceCommand(String command) {
-    print('🔍 音声コマンド処理開始: "$command"'); // デバッグログ
-    final lowerCommand = command.toLowerCase();
+  // ステップ2: テキストに応じてコマンドを実行 (Intent Matching)
+  void _executeVoiceCommand(String recognizedText) {
+    debugPrint('🔍 コマンド解析開始: "$recognizedText"');
 
-    // 「ヘルパー」が含まれているかチェック
-    if (!lowerCommand.contains('ヘルパー') &&
-        !lowerCommand.contains('へるぱー') &&
-        !lowerCommand.contains('helper')) {
-      // ヘルパーが含まれていない場合は無視
-      print('⏭️ ヘルパーが含まれていないため無視します'); // デバッグログ
+    // テキストを小文字に変換して解析しやすくする
+    final text = recognizedText.toLowerCase();
+
+    // コマンドのマッチングとアクション実行
+    final command = _matchCommand(text);
+
+    if (command == null) {
+      debugPrint('❌ 認識できないコマンド: $recognizedText');
+      _showCommandError('コマンドを認識できませんでした');
       return;
     }
 
-    print('✅ ヘルパーを検出しました。コマンドを解析します'); // デバッグログ
+    debugPrint('✅ コマンド実行: ${command.name}');
+    command.action();
+  }
 
-    // 次へのコマンド
-    if (lowerCommand.contains('次') ||
-        lowerCommand.contains('つぎ') ||
-        lowerCommand.contains('進む') ||
-        lowerCommand.contains('すすむ') ||
-        lowerCommand.contains('進んで') ||
-        lowerCommand.contains('次のステップ') ||
-        lowerCommand.contains('ネクスト')) {
-      print('⏩ 次へコマンドを実行'); // デバッグログ
-      _nextStep();
-      return;
+  // コマンドマッチング
+  _VoiceCommand? _matchCommand(String text) {
+    // コマンドリスト（優先度順）
+    final commands = [
+      // 次へ
+      _VoiceCommand(
+        name: '次へ',
+        keywords: ['次', 'つぎ', 'next', 'ネクスト', '進む', 'すすむ'],
+        action: () {
+          debugPrint('⏩ 次へ実行');
+          _nextStep();
+        },
+      ),
+      // 戻る
+      _VoiceCommand(
+        name: '戻る',
+        keywords: ['戻る', 'もどる', 'back', 'バック', '前', 'まえ', 'previous'],
+        action: () {
+          debugPrint('⏪ 戻る実行');
+          _previousStep();
+        },
+      ),
+      // 繰り返し
+      _VoiceCommand(
+        name: '繰り返し',
+        keywords: ['もう一度', 'もういちど', 'repeat', 'リピート', '繰り返', 'くりかえ', '読んで', 'よんで'],
+        action: () {
+          debugPrint('🔁 繰り返し実行');
+          _speakCurrentStep();
+        },
+      ),
+      // 停止
+      _VoiceCommand(
+        name: '停止',
+        keywords: ['停止', 'ていし', 'stop', 'ストップ', '止めて', 'やめて', '黙って', 'だまって'],
+        action: () {
+          debugPrint('⏹️ 停止実行');
+          _flutterTts.stop();
+          if (mounted) {
+            setState(() {
+              _isSpeaking = false;
+            });
+          }
+        },
+      ),
+    ];
+
+    // キーワードマッチング
+    for (final command in commands) {
+      if (command.matches(text)) {
+        return command;
+      }
     }
 
-    // 戻るのコマンド
-    if (lowerCommand.contains('戻る') ||
-        lowerCommand.contains('もどる') ||
-        lowerCommand.contains('前') ||
-        lowerCommand.contains('まえ') ||
-        lowerCommand.contains('戻して') ||
-        lowerCommand.contains('前のステップ') ||
-        lowerCommand.contains('バック')) {
-      print('⏪ 戻るコマンドを実行'); // デバッグログ
-      _previousStep();
-      return;
-    }
+    return null;
+  }
 
-    // 繰り返しのコマンド
-    if (lowerCommand.contains('もう一度') ||
-        lowerCommand.contains('もう1度') ||
-        lowerCommand.contains('繰り返し') ||
-        lowerCommand.contains('くりかえし') ||
-        lowerCommand.contains('リピート') ||
-        lowerCommand.contains('読んで') ||
-        lowerCommand.contains('よんで') ||
-        lowerCommand.contains('もう一回')) {
-      print('🔁 繰り返しコマンドを実行'); // デバッグログ
-      _speakCurrentStep();
-      return;
-    }
-
-    // 停止のコマンド
-    if (lowerCommand.contains('停止') ||
-        lowerCommand.contains('ていし') ||
-        lowerCommand.contains('止めて') ||
-        lowerCommand.contains('やめて') ||
-        lowerCommand.contains('ストップ') ||
-        lowerCommand.contains('黙って')) {
-      print('⏹️ 停止コマンドを実行'); // デバッグログ
-      _flutterTts.stop();
-      setState(() {
-        _isSpeaking = false;
-      });
-      return;
-    }
-
-    // ヘルパーは含まれているが、認識できるコマンドがなかった場合
-    print('❓ ヘルパーは検出されましたが、有効なコマンドが見つかりません'); // デバッグログ
+  void _showCommandError(String message) {
     if (mounted) {
-      setState(() {
-        _lastError = 'コマンドを認識できませんでした';
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.orange,
+        ),
+      );
     }
   }
 
@@ -1333,5 +1361,22 @@ CookHelperで作成
         ),
       ),
     );
+  }
+}
+
+// 音声コマンドを表すクラス
+class _VoiceCommand {
+  final String name;
+  final List<String> keywords;
+  final VoidCallback action;
+
+  _VoiceCommand({
+    required this.name,
+    required this.keywords,
+    required this.action,
+  });
+
+  bool matches(String text) {
+    return keywords.any((keyword) => text.contains(keyword));
   }
 }
