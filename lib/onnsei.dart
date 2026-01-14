@@ -53,7 +53,7 @@ class _RokuonPageState extends State<RokuonPage> {
       setState(() {
         _response = "録音開始エラー: $e";
       });
-      print('録音開始エラー: $e');
+      debugPrint('録音開始エラー: $e');
     }
   }
 
@@ -79,7 +79,7 @@ class _RokuonPageState extends State<RokuonPage> {
         _isRecording = false;
         _response = "録音停止エラー: $e";
       });
-      print('録音停止エラー: $e');
+      debugPrint('録音停止エラー: $e');
     }
   }
 
@@ -140,7 +140,7 @@ class _RokuonPageState extends State<RokuonPage> {
       setState(() {
         _response = "Geminiとの通信エラー: $e";
       });
-      print('Geminiエラー: $e');
+      debugPrint('Geminiエラー: $e');
     }
   }
 
@@ -183,7 +183,7 @@ class _RokuonPageState extends State<RokuonPage> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: _isRecording ? Colors.red.withOpacity(0.5) : Colors.blue.withOpacity(0.5),
+                        color: _isRecording ? Colors.red.withValues(alpha: 0.5) : Colors.blue.withValues(alpha: 0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
                       ),
