@@ -32,8 +32,10 @@ class GeminiTextService {
       }
 
       return response.text!;
+    } on GenerativeAIException catch (e) {
+      throw Exception('Gemini API error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to generate content: $e');
+      rethrow;
     }
   }
 
@@ -51,8 +53,10 @@ class GeminiTextService {
           yield chunk.text!;
         }
       }
+    } on GenerativeAIException catch (e) {
+      throw Exception('Gemini API stream error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to generate content stream: $e');
+      rethrow;
     }
   }
 }
