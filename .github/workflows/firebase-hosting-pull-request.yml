@@ -21,6 +21,8 @@ jobs:
         run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
       - run: flutter pub get
       - run: flutter build web
+      - name: Copy .env to build output
+        run: cp .env build/web/.env
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
