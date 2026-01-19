@@ -6,10 +6,20 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class GeminiTextService {
   late final GenerativeModel _model;
 
+  // ビルド時に --dart-define=GEMINI_API_KEY=xxx で渡される（本番用）
+  static const String _dartDefineApiKey =
+      String.fromEnvironment('GEMINI_API_KEY');
+
   GeminiTextService() {
-    final apiKey = dotenv.get('GEMINI_API_KEY', fallback: '');
+    // 1. --dart-define から取得（本番環境）
+    // 2. .env から取得（ローカル開発）
+    String apiKey = _dartDefineApiKey;
     if (apiKey.isEmpty) {
-      throw Exception('GEMINI_API_KEY not found in .env file');
+      apiKey = dotenv.maybeGet('GEMINI_API_KEY') ?? '';
+    }
+
+    if (apiKey.isEmpty) {
+      throw Exception('GEMINI_API_KEY not found');
     }
 
     _model = GenerativeModel(
