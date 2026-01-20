@@ -15,12 +15,9 @@ jobs:
         with:
           flutter-version: '3.38.6'
           channel: 'stable'
-      - name: Create .env file
-        run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
       - run: flutter pub get
-      - run: flutter build web
-      - name: Copy .env to build output
-        run: cp .env build/web/.env
+      - name: Build web with API key
+        run: flutter build web --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

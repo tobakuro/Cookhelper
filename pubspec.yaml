@@ -23,7 +23,7 @@ dependencies:
   audioplayers: ^6.0.0
 
   # --- 設定・ユーティリティ ---
-  # APIキーを安全に管理するための.env読み込み
+  # APIキーを安全に管理するための.env読み込み（ローカル開発用）
   flutter_dotenv: ^6.0.0
   # ファイルパスの取得（録音データ保存等）
   path_provider: ^2.1.2
@@ -52,9 +52,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 尅 非常に重要：ここを書き換えないと .env が読み込めません
   assets:
-    - .env
     - assets/alarm.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
