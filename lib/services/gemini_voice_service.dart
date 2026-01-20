@@ -25,6 +25,10 @@ class GeminiVoiceService extends ChangeNotifier {
   String _lastCommand = '';
   String _statusMessage = '';
 
+  // ビルド時に --dart-define=GEMINI_API_KEY=xxx で渡される（本番用）
+  static const String _dartDefineApiKey =
+      String.fromEnvironment('GEMINI_API_KEY');
+
   /// 音声コマンドが認識された時のコールバック
   void Function(VoiceCommand command, {int? value})? onCommandReceived;
 
@@ -34,7 +38,13 @@ class GeminiVoiceService extends ChangeNotifier {
 
   /// Gemini Live APIに接続
   Future<void> _connectToGemini() async {
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    // 1. --dart-define から取得（本番環境）
+    // 2. .env から取得（ローカル開発）
+    String apiKey = _dartDefineApiKey;
+    if (apiKey.isEmpty) {
+      apiKey = dotenv.maybeGet('GEMINI_API_KEY') ?? '';
+    }
+
     if (apiKey.isEmpty) {
       _statusMessage = 'APIキーが設定されていません';
       notifyListeners();
