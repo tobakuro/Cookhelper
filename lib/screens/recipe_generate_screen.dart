@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../gemini/gemini_text_service.dart';
+import '../theme/app_colors.dart';
 import 'cooking_screen.dart';
 
 class RecipeGenerateScreen extends StatefulWidget {
@@ -215,7 +216,6 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('レシピ生成'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -265,20 +265,20 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _recipes.isEmpty
-                      ? Center(
+                      ? const Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.auto_awesome,
                                 size: 64,
-                                color: Colors.grey.shade400,
+                                color: AppColors.textHint,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               Text(
                                 '材料を入力してレシピを生成してください',
                                 style: TextStyle(
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.textSecondary,
                                   fontSize: 16,
                                 ),
                                 textAlign: TextAlign.center,
@@ -314,15 +314,13 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                         width: 60,
                                         height: 60,
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
+                                          color: AppColors.iconContainerBg,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
-                                        child: Icon(
+                                        child: const Icon(
                                           Icons.restaurant,
                                           size: 32,
-                                          color: Theme.of(context).colorScheme.primary,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                       const SizedBox(width: 16),
@@ -335,22 +333,23 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                               style: const TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
+                                                color: AppColors.textPrimary,
                                               ),
                                             ),
                                             const SizedBox(height: 8),
                                             Row(
                                               children: [
-                                                Icon(
+                                                const Icon(
                                                   Icons.access_time,
                                                   size: 16,
-                                                  color: Colors.grey.shade600,
+                                                  color: AppColors.textSecondary,
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   recipe.cookingTime,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 14,
-                                                    color: Colors.grey.shade700,
+                                                    color: AppColors.textSecondary,
                                                   ),
                                                 ),
                                               ],
@@ -367,17 +366,17 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                                       vertical: 4,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.orange.shade50,
+                                                      color: AppColors.iconContainerBg,
                                                       borderRadius: BorderRadius.circular(12),
                                                       border: Border.all(
-                                                        color: Colors.orange.shade200,
+                                                        color: AppColors.stepBorder,
                                                       ),
                                                     ),
                                                     child: Text(
                                                       ingredient.split(' ').first.split('　').first,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 12,
-                                                        color: Colors.orange.shade900,
+                                                        color: AppColors.primaryDark,
                                                       ),
                                                     ),
                                                   );
@@ -390,9 +389,9 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                                     ),
                                                     child: Text(
                                                       '他${recipe.ingredients.length - 3}品',
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 12,
-                                                        color: Colors.grey.shade600,
+                                                        color: AppColors.textSecondary,
                                                         fontStyle: FontStyle.italic,
                                                       ),
                                                     ),
@@ -402,9 +401,9 @@ class _RecipeGenerateScreenState extends State<RecipeGenerateScreen> {
                                           ],
                                         ),
                                       ),
-                                      Icon(
+                                      const Icon(
                                         Icons.arrow_forward_ios,
-                                        color: Colors.grey.shade400,
+                                        color: AppColors.textHint,
                                       ),
                                     ],
                                   ),

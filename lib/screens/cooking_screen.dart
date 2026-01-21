@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../models/cooking_step.dart';
 import '../services/timer_service.dart';
 import '../services/gemini_voice_service.dart';
+import '../theme/app_colors.dart';
 
 class CookingScreen extends StatefulWidget {
   final String recipeName;
@@ -127,7 +128,7 @@ class _CookingScreenState extends State<CookingScreen> {
           builder: (context) => AlertDialog(
             title: const Row(
               children: [
-                Icon(Icons.alarm, color: Colors.orange, size: 32),
+                Icon(Icons.alarm, color: AppColors.primary, size: 32),
                 SizedBox(width: 8),
                 Text('タイマー終了'),
               ],
@@ -140,7 +141,7 @@ class _CookingScreenState extends State<CookingScreen> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('OK'),
@@ -304,13 +305,12 @@ class _CookingScreenState extends State<CookingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.recipeName, style: const TextStyle(fontSize: 18)),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: _currentPage == 1
             ? [
                 IconButton(
                   icon: Icon(
                     _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: _isFavorite ? Colors.red : null,
+                    color: _isFavorite ? AppColors.error : AppColors.appBarFg,
                   ),
                   onPressed: _toggleFavorite,
                 ),
@@ -334,20 +334,19 @@ class _CookingScreenState extends State<CookingScreen> {
           Center(
             child: Text(
               widget.recipeName,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 32),
-          _buildSection(title: '必要な材料', icon: Icons.shopping_basket, items: _ingredients, color: Colors.orange),
+          _buildSection(title: '必要な材料', icon: Icons.shopping_basket, items: _ingredients),
           const SizedBox(height: 24),
-          _buildSection(title: '必要な器具', icon: Icons.kitchen, items: _tools, color: Colors.blue),
+          _buildSection(title: '必要な器具', icon: Icons.kitchen, items: _tools),
           const SizedBox(height: 24),
           _buildSection(
             title: '調理工程',
             icon: Icons.list_alt,
             items: _steps.map((s) => s.description).toList(),
-            color: Colors.green,
           ),
           const SizedBox(height: 32),
           SizedBox(
@@ -358,7 +357,7 @@ class _CookingScreenState extends State<CookingScreen> {
               label: const Text('調理を開始', style: TextStyle(fontSize: 20)),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(20),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -372,13 +371,13 @@ class _CookingScreenState extends State<CookingScreen> {
     required String title,
     required IconData icon,
     required List<String> items,
-    required Color color,
   }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: color, width: 2),
+        color: AppColors.surfaceVariant,
+        border: Border.all(color: AppColors.border, width: 1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -386,9 +385,9 @@ class _CookingScreenState extends State<CookingScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: color),
+              Icon(icon, color: AppColors.primary),
               const SizedBox(width: 8),
-              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             ],
           ),
           const SizedBox(height: 12),
@@ -397,8 +396,8 @@ class _CookingScreenState extends State<CookingScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${entry.key + 1}. ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
-                    Expanded(child: Text(entry.value, style: const TextStyle(fontSize: 16))),
+                    Text('${entry.key + 1}. ', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    Expanded(child: Text(entry.value, style: const TextStyle(fontSize: 16, color: AppColors.textPrimary))),
                   ],
                 ),
               )),
@@ -425,7 +424,7 @@ class _CookingScreenState extends State<CookingScreen> {
                 // ステップカウンター
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(20)),
                   child: Text(
                     'ステップ ${_currentStepIndex + 1} / ${_steps.length}',
                     style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
@@ -438,13 +437,13 @@ class _CookingScreenState extends State<CookingScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24.0),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: AppColors.stepBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blue.shade200, width: 2),
+                    border: Border.all(color: AppColors.stepBorder, width: 2),
                   ),
                   child: Text(
                     _steps[_currentStepIndex].description,
-                    style: const TextStyle(fontSize: 20, height: 1.8, fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontSize: 20, height: 1.8, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -467,14 +466,14 @@ class _CookingScreenState extends State<CookingScreen> {
     final lastCommand = _voiceService.lastCommand;
 
     return Card(
-      color: isListening ? Colors.green.shade50 : Colors.grey.shade100,
+      color: isListening ? AppColors.listeningBg : AppColors.surfaceVariant,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
             Icon(
               isListening ? Icons.mic : Icons.mic_off,
-              color: isListening ? Colors.green.shade700 : Colors.grey,
+              color: isListening ? AppColors.listeningActive : AppColors.listeningInactive,
               size: 28,
             ),
             const SizedBox(width: 12),
@@ -486,13 +485,13 @@ class _CookingScreenState extends State<CookingScreen> {
                     isListening ? '音声認識中' : '音声認識停止中',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isListening ? Colors.green.shade900 : Colors.grey.shade700,
+                      color: isListening ? AppColors.textPrimary : AppColors.textSecondary,
                     ),
                   ),
                   if (lastCommand.isNotEmpty)
                     Text(
                       '最後のコマンド: $lastCommand',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                 ],
               ),
@@ -501,7 +500,7 @@ class _CookingScreenState extends State<CookingScreen> {
             IconButton(
               icon: Icon(isListening ? Icons.stop : Icons.play_arrow),
               onPressed: isListening ? _voiceService.stopListening : _voiceService.startListening,
-              color: isListening ? Colors.red : Colors.green,
+              color: isListening ? AppColors.error : AppColors.primary,
             ),
           ],
         ),
@@ -520,15 +519,14 @@ class _CookingScreenState extends State<CookingScreen> {
         builder: (context, _) {
           final isFinished = _timerService.isFinished;
           final isRunning = _timerService.isRunning;
-          final color = isFinished ? Colors.green : Colors.orange;
 
           return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: color.shade50,
+              color: AppColors.timerBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.shade300, width: 2),
+              border: Border.all(color: AppColors.timerBorder, width: 2),
             ),
             child: Column(
               children: [
@@ -536,11 +534,11 @@ class _CookingScreenState extends State<CookingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(isFinished ? Icons.check_circle : Icons.timer, color: color.shade700, size: 28),
+                    Icon(isFinished ? Icons.check_circle : Icons.timer, color: isFinished ? AppColors.success : AppColors.primary, size: 28),
                     const SizedBox(width: 8),
                     Text(
                       isFinished ? '完了!' : 'タイマー',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color.shade700),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isFinished ? AppColors.success : AppColors.primary),
                     ),
                   ],
                 ),
@@ -560,13 +558,13 @@ class _CookingScreenState extends State<CookingScreen> {
                           child: CircularProgressIndicator(
                             value: isFinished ? 1.0 : _timerService.progress,
                             strokeWidth: 8,
-                            backgroundColor: Colors.grey.shade300,
-                            valueColor: AlwaysStoppedAnimation<Color>(color.shade600),
+                            backgroundColor: AppColors.border,
+                            valueColor: AlwaysStoppedAnimation<Color>(isFinished ? AppColors.success : AppColors.primary),
                           ),
                         ),
                       Text(
                         _timerService.totalSeconds > 0 ? _timerService.displayTime : _formatTime(timerSeconds),
-                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: color.shade700),
+                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: isFinished ? AppColors.success : AppColors.primary),
                       ),
                     ],
                   ),
@@ -575,7 +573,7 @@ class _CookingScreenState extends State<CookingScreen> {
 
                 // 時間調整ボタン（未開始時のみ）
                 if (!isRunning && !isFinished) ...[
-                  const Text('時間調整', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  const Text('時間調整', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -609,7 +607,7 @@ class _CookingScreenState extends State<CookingScreen> {
         icon: const Icon(Icons.refresh),
         label: const Text('リセット'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade600,
+          backgroundColor: AppColors.success,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
         ),
@@ -625,7 +623,7 @@ class _CookingScreenState extends State<CookingScreen> {
             icon: const Icon(Icons.pause),
             label: const Text('一時停止'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange.shade600,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
           ),
@@ -635,7 +633,7 @@ class _CookingScreenState extends State<CookingScreen> {
             icon: const Icon(Icons.stop),
             label: const Text('停止'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: AppColors.textPrimary,
               foregroundColor: Colors.white,
             ),
           ),
@@ -653,7 +651,7 @@ class _CookingScreenState extends State<CookingScreen> {
             icon: const Icon(Icons.play_arrow),
             label: const Text('再開'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange.shade600,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
           ),
@@ -663,7 +661,7 @@ class _CookingScreenState extends State<CookingScreen> {
             icon: const Icon(Icons.stop),
             label: const Text('停止'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: AppColors.textPrimary,
               foregroundColor: Colors.white,
             ),
           ),
@@ -677,7 +675,7 @@ class _CookingScreenState extends State<CookingScreen> {
       icon: const Icon(Icons.play_arrow),
       label: const Text('開始'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange.shade600,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
       ),
@@ -695,9 +693,9 @@ class _CookingScreenState extends State<CookingScreen> {
       onPressed: () => _adjustTimerTime(seconds),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        side: BorderSide(color: Colors.orange.shade600),
+        side: const BorderSide(color: AppColors.primary),
       ),
-      child: Text(label, style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
+      child: Text(label, style: const TextStyle(color: AppColors.primary, fontSize: 12)),
     );
   }
 
@@ -706,7 +704,7 @@ class _CookingScreenState extends State<CookingScreen> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 10, offset: const Offset(0, -2))],
+        boxShadow: [BoxShadow(color: AppColors.border, blurRadius: 10, offset: const Offset(0, -2))],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -715,7 +713,13 @@ class _CookingScreenState extends State<CookingScreen> {
             onPressed: _currentStepIndex > 0 ? _previousStep : null,
             icon: const Icon(Icons.arrow_back),
             label: const Text('戻る'),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              backgroundColor: AppColors.surfaceVariant,
+              foregroundColor: AppColors.textPrimary,
+              disabledBackgroundColor: AppColors.divider,
+              disabledForegroundColor: AppColors.textHint,
+            ),
           ),
           ElevatedButton.icon(
             onPressed: _speakCurrentStep,
@@ -723,7 +727,7 @@ class _CookingScreenState extends State<CookingScreen> {
             label: Text(_isSpeaking ? '停止' : '読み上げ'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              backgroundColor: _isSpeaking ? Colors.red : Colors.blue,
+              backgroundColor: _isSpeaking ? AppColors.textPrimary : AppColors.primary,
               foregroundColor: Colors.white,
             ),
           ),
@@ -731,7 +735,11 @@ class _CookingScreenState extends State<CookingScreen> {
             onPressed: _nextStep,
             icon: const Icon(Icons.arrow_forward),
             label: const Text('次へ'),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
           ),
         ],
       ),
@@ -745,11 +753,11 @@ class _CookingScreenState extends State<CookingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.celebration, size: 100, color: Colors.green),
+            const Icon(Icons.celebration, size: 100, color: AppColors.primary),
             const SizedBox(height: 24),
-            const Text('調理完了！', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+            const Text('調理完了！', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 16),
-            Text(widget.recipeName, style: const TextStyle(fontSize: 24), textAlign: TextAlign.center),
+            Text(widget.recipeName, style: const TextStyle(fontSize: 24, color: AppColors.textSecondary), textAlign: TextAlign.center),
             const SizedBox(height: 48),
 
             // お気に入り
@@ -757,11 +765,15 @@ class _CookingScreenState extends State<CookingScreen> {
               child: ListTile(
                 leading: Icon(
                   _isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: _isFavorite ? Colors.red : null,
+                  color: _isFavorite ? AppColors.error : AppColors.textHint,
                   size: 32,
                 ),
-                title: const Text('お気に入りに追加', style: TextStyle(fontSize: 18)),
-                trailing: Switch(value: _isFavorite, onChanged: (_) => _toggleFavorite()),
+                title: const Text('お気に入りに追加', style: TextStyle(fontSize: 18, color: AppColors.textPrimary)),
+                trailing: Switch(
+                  value: _isFavorite,
+                  onChanged: (_) => _toggleFavorite(),
+                  activeTrackColor: AppColors.primary,
+                ),
                 onTap: _toggleFavorite,
               ),
             ),
@@ -770,9 +782,9 @@ class _CookingScreenState extends State<CookingScreen> {
             // 共有
             Card(
               child: ListTile(
-                leading: const Icon(Icons.share, size: 32),
-                title: const Text('レシピを共有', style: TextStyle(fontSize: 18)),
-                trailing: const Icon(Icons.arrow_forward_ios),
+                leading: const Icon(Icons.share, size: 32, color: AppColors.textSecondary),
+                title: const Text('レシピを共有', style: TextStyle(fontSize: 18, color: AppColors.textPrimary)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppColors.textHint),
                 onTap: _shareRecipe,
               ),
             ),
@@ -784,7 +796,7 @@ class _CookingScreenState extends State<CookingScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    const Text('レシピを評価', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('レシピを評価', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -793,7 +805,7 @@ class _CookingScreenState extends State<CookingScreen> {
                         (index) => IconButton(
                           icon: Icon(
                             index < _rating ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
+                            color: AppColors.star,
                             size: 40,
                           ),
                           onPressed: () => setState(() => _rating = index + 1),
@@ -813,7 +825,7 @@ class _CookingScreenState extends State<CookingScreen> {
               label: const Text('ホームに戻る'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                backgroundColor: Colors.blue,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
             ),

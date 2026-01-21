@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../gemini/gemini_text_service.dart';
+import '../theme/app_colors.dart';
 
 class RecipeSearchScreen extends StatefulWidget {
   const RecipeSearchScreen({super.key});
@@ -151,7 +152,6 @@ URL: （レシピページのURL）
     return Scaffold(
       appBar: AppBar(
         title: const Text('レシピ検索'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -194,29 +194,29 @@ URL: （レシピページのURL）
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _recipeLinks.isEmpty
-                      ? Center(
+                      ? const Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.search,
                                 size: 64,
-                                color: Colors.grey.shade400,
+                                color: AppColors.textHint,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               Text(
                                 '料理名やジャンルで検索してください',
                                 style: TextStyle(
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.textSecondary,
                                   fontSize: 16,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Text(
                                 '例: カレー、イタリア料理、和食、スイーツ',
                                 style: TextStyle(
-                                  color: Colors.grey.shade500,
+                                  color: AppColors.textHint,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -242,13 +242,13 @@ URL: （レシピページのURL）
                                         width: 60,
                                         height: 60,
                                         decoration: BoxDecoration(
-                                          color: Colors.blue.shade50,
+                                          color: AppColors.iconContainerBg,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
-                                        child: Icon(
+                                        child: const Icon(
                                           Icons.link,
                                           size: 32,
-                                          color: Colors.blue.shade700,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                       const SizedBox(width: 16),
@@ -261,22 +261,23 @@ URL: （レシピページのURL）
                                               style: const TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
+                                                color: AppColors.textPrimary,
                                               ),
                                             ),
                                             const SizedBox(height: 8),
                                             Row(
                                               children: [
-                                                Icon(
+                                                const Icon(
                                                   Icons.public,
                                                   size: 16,
-                                                  color: Colors.grey.shade600,
+                                                  color: AppColors.textSecondary,
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   recipeLink.site,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 14,
-                                                    color: Colors.grey.shade700,
+                                                    color: AppColors.textSecondary,
                                                   ),
                                                 ),
                                               ],
@@ -284,9 +285,9 @@ URL: （レシピページのURL）
                                           ],
                                         ),
                                       ),
-                                      Icon(
+                                      const Icon(
                                         Icons.open_in_new,
-                                        color: Colors.blue.shade700,
+                                        color: AppColors.primary,
                                       ),
                                     ],
                                   ),
