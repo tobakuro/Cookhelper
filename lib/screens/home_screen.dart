@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'recipe_search_screen.dart';
 import 'recipe_generate_screen.dart';
 import 'favorites_screen.dart';
+import '../theme/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -12,7 +13,6 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('CookHelper'),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
               const Icon(
                 Icons.restaurant_menu,
                 size: 80,
-                color: Colors.deepPurple,
+                color: AppColors.primary,
               ),
               const SizedBox(height: 16),
               const Text(
@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                 '手を使わず、音声でレシピをナビゲート',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 48),
@@ -118,13 +118,13 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: AppColors.iconContainerBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
                   size: 32,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -137,6 +137,7 @@ class HomeScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -144,13 +145,13 @@ class HomeScreen extends StatelessWidget {
                       description,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              const Icon(Icons.chevron_right, color: AppColors.textHint),
             ],
           ),
         ),
