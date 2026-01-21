@@ -41,7 +41,7 @@ class GeminiVoiceService extends ChangeNotifier {
     // 1. --dart-define から取得（本番環境）
     // 2. .env から取得（ローカル開発）
     String apiKey = _dartDefineApiKey;
-    if (apiKey.isEmpty) {
+    if (apiKey.isEmpty && dotenv.isInitialized) {
       apiKey = dotenv.maybeGet('GEMINI_API_KEY') ?? '';
     }
 
